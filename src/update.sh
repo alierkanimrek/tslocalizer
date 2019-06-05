@@ -6,8 +6,9 @@
 
 
 
-path=$(dirname $(readlink -f $0))
-cd $path
+#path=$(dirname $(readlink -f $0))
+path=$(pwd)
+#cd $path
 
 help(){
     echo 'update.sh myapp'
@@ -37,7 +38,7 @@ cd $app_path
 # Create new po locale dir if second parameter given
 if [[ ! $2 == "" ]]; then
     rm .*
-    mkdir -p $po_path/$2    
+    mkdir -p $po_path/$2
 fi
 
 #Get locale dir list
@@ -67,11 +68,14 @@ if [[ $current != $last ]]; then
         #Every source file
         for app in *.py
         do
+            cd $app_path
             #Create or update .POT locale source
             fn="${app%.*}"
             echo -e "\t$app "
             mkdir -p $po_path/
             echo -e  "\t\tUpdate pot"
+            pwd
+            echo $po_path/$fn.pot
             xgettext --language=Python --keyword=_ --from-code=UTF-8 --output=$po_path/$fn.pot $app
             sed -i 's/charset=CHARSET/charset=UTF-8/g' $po_path/$fn.pot
 

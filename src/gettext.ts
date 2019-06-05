@@ -16,17 +16,17 @@ export class Translator {
 
 
 
-    private _root:string
-    private _app:string
-    private _lang:any
-    private _locales:Array<string> 
-    private _ids:Array<string> 
-    private _nativeNames:Array<string> 
-    private _state:boolean
-    private _current:string
-    private _letchange:string
-    private _default:string
-    private _txt:JSON|any
+    private _root:string                // File location
+    private _app:string                 // App name
+    private _lang:any                   // lang.json file content
+    private _locales:Array<string>      // Locale names in English
+    private _ids:Array<string>          // Locale ids like en-us
+    private _nativeNames:Array<string>  // Locale nativeNames
+    private _state:boolean              // Loading state
+    private _current:string             // current locale id
+    private _letchange:string           // locale id that attempting to change
+    private _default:string             // default locale id
+    private _txt:JSON|any               // app locale txt content
 
 
 
@@ -43,7 +43,9 @@ export class Translator {
         else {    this._default = "en-us"}
         this._letchange = ""
         this._current = ""
-        this._txt = this._txt = JSON.parse("{}")
+        this._txt = JSON.parse("{}")
+
+        //Load lang.json on initializing
         xhr.open("GET", this._root+"lang.json", true)
         xhr.onreadystatechange = this.load.bind(this, xhr)
         console.log("[i18n] Loading...")
@@ -65,6 +67,8 @@ export class Translator {
 
         if (xhr.readyState == 4) {
             if (xhr.status == 200) { 
+
+                // Loaded
                 try{
                     if(lang){
                         //Lang file
@@ -79,8 +83,10 @@ export class Translator {
                     return
                 }
                 if(lang){
+                    //lang.json
                     this.parse()
                 }else{
+                    //locale txt file
                     this._current = this._letchange
                     this.updateStatics()
                     this._state = true
@@ -96,12 +102,16 @@ export class Translator {
 
 
     private parse():void {
+        /*
+            Parsing lang.json
+        */
         try{
             for (let l in this._lang) {
                 this._locales.push(l)
                 this._nativeNames.push( this._lang[l]["native"])
                 this._ids.push(this._lang[l]["id"])
             }
+            console.log("[i18n] Available languages : "+String(this._locales))
         }
         catch{
             console.log("[i18n] lang.json is not valid")
@@ -114,12 +124,21 @@ export class Translator {
 
 
     private resolveInitId():string{
-        let sys = navigator.language.toLowerCase()
-        //FIX IT
-        let cookie = ""
-        if(this.name(cookie)){    return(cookie) }
-        if(this.name(sys)){    return(sys) }
+        /*
+            Find initial language
+        */        
+        
+        // Default lang has highest priority 
+        // Default can be initial id
         if(this.name(this._default)){    return(this._default) }
+
+        // Otherwise let set browser language
+        console.log("[i18n] Default language not found : "+this._default)
+        let sys = navigator.language.toLowerCase()
+        if(this.name(sys)){    return(sys) }
+
+        // neither of them let choose first
+        console.log("[i18n] Browser language not found : "+sys)
         for (let l in this._lang) {
             return(this._lang[l]["id"])
         }
@@ -141,21 +160,33 @@ export class Translator {
 
 
     public change(id:string):void{
+        /*
+            Change language
+        */
         if(id == this._current){
             this.updateStatics()
             return           
         }
-        this._letchange = id
-        xhr.open("GET", this._root+this._app+"_"+id+".json", true)
-        xhr.onreadystatechange = this.load.bind(this, xhr)
-        console.log("[i18n] loading "+this._app+"_"+id)
-        xhr.send()
+        // If exist in lang
+        if(this.name(id)){
+            this._letchange = id
+            xhr.open("GET", this._root+this._app+"_"+id+".json", true)
+            xhr.onreadystatechange = this.load.bind(this, xhr)
+            console.log("[i18n] loading "+this._app+"_"+id)
+            xhr.send()
+        }
+        else{
+            console.log("[i18n] Language not found : "+id)
+        }
     }
 
 
 
 
     public get current() : string {
+        /*
+            Get current id
+        */
         return (this._current)
     }
 
@@ -216,6 +247,9 @@ export class Translator {
 
 
     public translations(section:string):GetText{
+        /*
+            Return GetText object of given section traslations
+        */
         try{
             this._txt[section]
             return(new GetText(this, section))
@@ -228,6 +262,11 @@ export class Translator {
 
 
     public updateSectionStatics(section:string):void{
+        /*
+            Change DOM elements according to static values of given section
+        */
+        console.log(this._state)
+        console.log(this._txt)
         try{
             let statics = this._txt[section]["static"]
             Object.keys(statics).forEach((id:string)=>{
@@ -251,6 +290,9 @@ export class Translator {
 
 
     private updateStatics():void{
+        /*
+            Change all section statics
+        */
         Object.keys(this._txt).forEach((section:string)=>{
             this.updateSectionStatics(section)
         })
@@ -293,6 +335,9 @@ export class GetText {
 
 
     public _(id:string):string{
+        /*
+            Return dynamic txt
+        */
         let txt = <any>this.trns.txt
         try{    return(txt[this.section]["dynamic"][id]) }
         catch{    return("")}
