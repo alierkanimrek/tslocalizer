@@ -265,8 +265,6 @@ export class Translator {
         /*
             Change DOM elements according to static values of given section
         */
-        console.log(this._state)
-        console.log(this._txt)
         try{
             let statics = this._txt[section]["static"]
             Object.keys(statics).forEach((id:string)=>{
