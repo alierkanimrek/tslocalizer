@@ -12,6 +12,17 @@ const xhr = new XMLHttpRequest()
 
 
 
+interface EventCallback {
+    type:string,
+    callback:Function
+}
+
+
+
+
+
+
+
 export class Translator {
 
 
@@ -27,6 +38,7 @@ export class Translator {
     private _letchange:string           // locale id that attempting to change
     private _default:string             // default locale id
     private _txt:JSON|any               // app locale txt content
+    private events: Array<EventCallback> = []    //Event 
 
 
 
@@ -90,6 +102,7 @@ export class Translator {
                     this._current = this._letchange
                     this.updateStatics()
                     this._state = true
+                    this.dispatchEvent("change")
                 }
             } else {
                 console.log("[i18n] "+file+" could not load, "+xhr.statusText)
@@ -178,6 +191,23 @@ export class Translator {
         else{
             console.log("[i18n] Language not found : "+id)
         }
+    }
+
+
+
+    public addEventListener(type: string, listener: Function):void{
+        this.events.push({type:type, callback:listener})
+    }
+
+
+
+
+    private dispatchEvent(type:string):void{
+        this.events.forEach((evt:EventCallback)=>{
+            if(type == evt.type){
+                evt.callback(this)
+            }
+        })
     }
 
 
