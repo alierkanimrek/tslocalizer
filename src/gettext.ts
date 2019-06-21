@@ -60,7 +60,7 @@ export class Translator {
         //Load lang.json on initializing
         xhr.open("GET", this._root+"lang.json", true)
         xhr.onreadystatechange = this.load.bind(this, xhr)
-        console.log("[i18n] Loading...")
+        console.info("[i18n] Loading...")
         xhr.send()
     }
 
@@ -91,7 +91,7 @@ export class Translator {
                     }
                 }
                 catch{
-                    console.log("[i18n] "+file+" is not valid JSON format")
+                    console.error("[i18n] "+file+" is not valid JSON format")
                     return
                 }
                 if(lang){
@@ -105,7 +105,7 @@ export class Translator {
                     this.dispatchEvent("change")
                 }
             } else {
-                console.log("[i18n] "+file+" could not load, "+xhr.statusText)
+                console.error("[i18n] "+file+" could not load, "+xhr.statusText)
             }
         }
     }
@@ -124,10 +124,10 @@ export class Translator {
                 this._nativeNames.push( this._lang[l]["native"])
                 this._ids.push(this._lang[l]["id"])
             }
-            console.log("[i18n] Available languages : "+String(this._locales))
+            console.info("[i18n] Available languages : "+String(this._locales))
         }
         catch{
-            console.log("[i18n] lang.json is not valid")
+            console.error("[i18n] lang.json is not valid")
             return
         }
         this.change(this.resolveInitId())
@@ -146,12 +146,12 @@ export class Translator {
         if(this.name(this._default)){    return(this._default) }
 
         // Otherwise let set browser language
-        console.log("[i18n] Default language not found : "+this._default)
+        console.warn("[i18n] Default language not found : "+this._default)
         let sys = navigator.language.toLowerCase()
         if(this.name(sys)){    return(sys) }
 
         // neither of them let choose first
-        console.log("[i18n] Browser language not found : "+sys)
+        console.warn("[i18n] Browser language not found : "+sys)
         for (let l in this._lang) {
             return(this._lang[l]["id"])
         }
@@ -185,11 +185,11 @@ export class Translator {
             this._letchange = id
             xhr.open("GET", this._root+this._app+"_"+id+".json", true)
             xhr.onreadystatechange = this.load.bind(this, xhr)
-            console.log("[i18n] loading "+this._app+"_"+id)
+            console.info("[i18n] loading "+this._app+"_"+id)
             xhr.send()
         }
         else{
-            console.log("[i18n] Language not found : "+id)
+            console.error("[i18n] Language not found : "+id)
         }
     }
 
@@ -284,7 +284,7 @@ export class Translator {
             this._txt[section]
             return(new GetText(this, section))
         }catch{
-            console.log("[i18n] Section not found :"+section)
+            console.warn("[i18n] Section not found :"+section)
         }
     }
 
@@ -310,7 +310,7 @@ export class Translator {
                 })
             })
         }catch{
-            console.log("[i18n] Section not found :"+section)
+            console.warn("[i18n] Section not found :"+section)
         }        
     }
 
