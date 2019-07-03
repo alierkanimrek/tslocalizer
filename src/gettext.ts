@@ -100,7 +100,7 @@ export class Translator {
                 }else{
                     //locale txt file
                     this._current = this._letchange
-                    this.updateStatics()
+                    //this.updateStatics()
                     this._state = true
                     this.dispatchEvent("change")
                 }
@@ -291,7 +291,7 @@ export class Translator {
 
 
 
-    public updateSectionStatics(section:string):void{
+    public updateSectionStatics(section:string, gc?:any):void{
         /*
             Change DOM elements according to static values of given section
         */
@@ -302,10 +302,16 @@ export class Translator {
                 Object.keys(props).forEach((prop:string)=>{
                     let val = props[prop]
                     let elm = <any>document.getElementById(id)
+                    if(gc){
+                       elm = <any>gc.e[id]
+                    }
                     if(elm){
                         //Object.defineProperty(elm, prop, {value:val})
                         //elm.setAttribute(prop, String(val))
                         elm[prop] = val
+                    }
+                    else{
+                        console.warn("[i18n] Element not found :"+section+" / "+id)            
                     }
                 })
             })
@@ -317,14 +323,22 @@ export class Translator {
 
 
 
-    private updateStatics():void{
+    private updateStatics(gliderControl?:any):void{
         /*
             Change all section statics
         */
         Object.keys(this._txt).forEach((section:string)=>{
-            this.updateSectionStatics(section)
+            if(gliderControl){
+                this.updateSectionStatics(section, gliderControl)    
+            }
+            else{
+                this.updateSectionStatics(section)
+            }
         })
     }
+
+
+
 
 }
 
@@ -355,8 +369,13 @@ export class GetText {
 
 
 
-    public updateStatics():void{
-        this.trns.updateSectionStatics(this.section)
+    public updateStatics(gliderControl?:any):void{
+        if(gliderControl){        
+            this.trns.updateSectionStatics(this.section, gliderControl)
+        }
+        else{
+            this.trns.updateSectionStatics(this.section)
+        }
     }
 
 
