@@ -38,6 +38,7 @@ export class Translator {
     private _letchange:string           // locale id that attempting to change
     private _default:string             // default locale id
     private _txt:JSON|any               // app locale txt content
+    private _error:boolean              // error state
     private events: Array<EventCallback> = []    //Event 
 
 
@@ -47,6 +48,7 @@ export class Translator {
         this._root = root
         this._app = appName
         this._state = false
+        this._error = false
         this._lang = {}
         this._locales = []
         this._ids = []
@@ -92,6 +94,7 @@ export class Translator {
                 }
                 catch{
                     console.error("[i18n] "+file+" is not valid JSON format")
+                    this._error = true
                     return
                 }
                 if(lang){
@@ -106,6 +109,7 @@ export class Translator {
                 }
             } else {
                 console.error("[i18n] "+file+" could not load, "+xhr.statusText)
+                this._error = true
             }
         }
     }
@@ -128,6 +132,7 @@ export class Translator {
         }
         catch{
             console.error("[i18n] lang.json is not valid")
+            this._error = true
             return
         }
         this.change(this.resolveInitId())
@@ -225,6 +230,13 @@ export class Translator {
 
     public get state() : boolean {
         return (this._state)
+    }
+
+
+
+
+    public get error() : boolean {
+        return (this._error)
     }
 
 
